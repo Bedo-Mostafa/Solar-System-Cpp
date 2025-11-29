@@ -1,39 +1,118 @@
-[![SFML logo](https://www.sfml-dev.org/images/logo.png)](https://www.sfml-dev.org)
+# 🌌 Polished Solar System Simulation
 
-# SFML — Simple and Fast Multimedia Library
+A high-fidelity, physics-based space simulation engine built with **C++17**, **SFML**, and **Box2D**.
 
-SFML is a simple, fast, cross-platform and object-oriented multimedia API. It provides access to windowing, graphics, audio and network. It is written in C++, and has bindings for various languages such as C, .Net, Ruby, Python.
+This project simulates Newtonian gravity, orbital mechanics, and celestial collisions using a modular architecture based on **SOLID principles**. It features procedural generation, custom GLSL shaders for 3D volumetric effects, and a self-healing build system.
 
-## Authors
+<p align="center">
+  <img src="assets/demo.gif" alt="Solar System Demo" width="100%">
+</p>
 
-  - Laurent Gomila — main developer (laurent@sfml-dev.org)
-  - Marco Antognini — OS X developer (hiura@sfml-dev.org)
-  - Jonathan De Wachter — Android developer (dewachter.jonathan@gmail.com)
-  - Jan Haller (bromeon@sfml-dev.org)
-  - Stefan Schindler (tank@sfml-dev.org)
-  - Lukas Dürrenberger (eXpl0it3r@sfml-dev.org)
-  - binary1248 (binary1248@hotmail.com)
-  - Artur Moreira (artturmoreira@gmail.com)
-  - Mario Liebisch (mario@sfml-dev.org)
-  - And many other members of the SFML community
+---
 
-## Download
+## ✨ Key Features
 
-You can get the latest official release on [SFML's website](https://www.sfml-dev.org/download.php). You can also get the current development version from the [Git repository](https://github.com/SFML/SFML).
+### 🪐 Physics & Simulation
+* **Newtonian Gravity Engine:** Real-time calculation of $F = G \frac{m_1 m_2}{r^2}$ for realistic orbital mechanics.
+* **Automatic Orbit Injection:** New planets automatically calculate the precise tangential velocity required for a stable circular orbit relative to the Sun.
+* **Collision Event System:**
+    * **Sun Destruction:** Planets that hit the Sun are pulled in via a "Black Hole" suction effect.
+    * **Planet Merging:** Planets colliding with each other are destroyed/absorbed rather than bouncing unrealistically.
 
-## Install
+### 🎨 Cinematic Visuals (GLSL Shaders)
+* **Milky Way Background:** A procedurally generated fragment shader creating a dynamic, moving nebula and twinkling starfield.
+* **3D Planet Rendering:** Custom lighting shaders turn 2D circles into 3D-looking spheres with rim lighting and shadows based on the Sun's position.
+* **Glowing Sun:** Radial gradient shader creating a bright core and soft corona.
+* **Orbital Trails:** Fading vertex arrays that track planetary paths, smoothing out movement.
+* **Cinematic Intro:** A smooth, interpolated camera zoom-out animation upon application start.
 
-Follow the instructions of the [tutorials](https://www.sfml-dev.org/tutorials/), there is one for each platform/compiler that SFML supports.
+### 📊 User Interface
+* **Live Dashboard:** Displays entity count, FPS, and the governing physics equations.
+* **Dynamic Labels:** Every planet displays its Mass and Velocity in real-time, floating above the object.
 
-## Learn
+### 🎵 Audio
+* **Ambient Soundtrack:** Integrated background music support (WAV/OGG).
 
-There are several places to learn SFML:
+---
 
-  * The [official tutorials](https://www.sfml-dev.org/tutorials/)
-  * The [online API documentation](https://www.sfml-dev.org/documentation/)
-  * The [community wiki](https://github.com/SFML/SFML/wiki/)
-  * The [community forum](https://en.sfml-dev.org/forums/) ([French](https://fr.sfml-dev.org/forums/))
+## 📐 System Design (UML & SOLID)
 
-## Contribute
+The project follows a strict Object-Oriented design adhering to **SOLID principles** (Single Responsibility, Open/Closed, Liskov Substitution, Dependency Inversion).
 
-SFML is an open-source project, and it needs your help to go on growing and improving. If you want to get involved and suggest some additional features, file a bug report or submit a patch, please have a look at the [contribution guidelines](https://www.sfml-dev.org/contribute.php).
+### Class Diagram
+
+```mermaid
+classDiagram
+    class Game {
+        -RenderWindow window
+        -View camera
+        +run()
+        -update(dt)
+        -render()
+    }
+
+    class CelestialBody {
+        <<Abstract>>
+        #b2Body* body
+        #Shape shape
+        +render(window, shader)
+        +update(dt)
+        +getMass()
+        +getPosition()
+    }
+
+    class Sun {
+        -Shader shader
+        +render()
+    }
+
+    class Planet {
+        -State state
+        -VertexArray trail
+        -Text label
+        +update(dt)
+        +startDeath()
+    }
+
+    class PhysicsWorld {
+        -b2World world
+        -ContactListener listener
+        +update()
+    }
+
+    class GravitySystem {
+        <<Static>>
+        +applyGravity(Sun, Planet)
+        +calculateOrbitVelocity()
+    }
+
+    class GameResources {
+        +Shader sunShader
+        +Shader planetShader
+        +Font font
+        +Music bgMusic
+        +load()
+    }
+
+    class InputHandler {
+        +handleInput()
+    }
+
+    class GuiLayer {
+        +update(count)
+        +render()
+    }
+
+    %% Relationships
+    Game *-- PhysicsWorld
+    Game *-- InputHandler
+    Game *-- GuiLayer
+    Game *-- GameResources
+    Game *-- "1" Sun
+    Game *-- "*" Planet
+
+    CelestialBody <|-- Sun : Inherits
+    CelestialBody <|-- Planet : Inherits
+
+    Game ..> GravitySystem : Uses
+    PhysicsWorld *-- ContactListener : Owns

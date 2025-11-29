@@ -4,7 +4,7 @@
 #include <cmath>
 
 Game::Game() 
-    : m_window(sf::VideoMode(1400, 1000), "Polished Solar System", sf::Style::Default, sf::ContextSettings(0, 0, 8))
+    : m_window(sf::VideoMode(1400, 1000), "Polished Solar System", sf::Style::Fullscreen, sf::ContextSettings(0, 0, 8))
 {
     m_window.setFramerateLimit(60);
     m_resources.load();
