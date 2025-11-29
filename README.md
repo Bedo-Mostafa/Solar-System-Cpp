@@ -1,82 +1,118 @@
 # 🌌 Polished Solar System Simulation
 
-A high-performance, physics-based space simulation built with **C++**, **SFML**, and **Box2D**. 
+A high-fidelity, physics-based space simulation engine built with **C++17**, **SFML**, and **Box2D**.
 
-This project simulates Newtonian gravity, orbital mechanics, and celestial collisions, rendered with custom GLSL shaders for a cinematic visual experience. The architecture follows **SOLID principles** for modularity and scalability.
+This project simulates Newtonian gravity, orbital mechanics, and celestial collisions using a modular architecture based on **SOLID principles**. It features procedural generation, custom GLSL shaders for 3D volumetric effects, and a self-healing build system.
 
-![Project Screenshot](screenshot.png) 
-*(Add a screenshot of your game here)*
+<p align="center">
+  <img src="assets/demo.gif" alt="Solar System Demo" width="100%">
+</p>
+
+---
 
 ## ✨ Key Features
 
-* **Real-time Physics:** Uses **Box2D** for collision detection and custom Newtonian gravity calculations.
-* **Procedural Generation:** Every planet has randomized mass, radius, density, and color.
-* **Cinematic Visuals:**
-    * **Milky Way Shader:** A dynamic, procedurally generated galaxy background.
-    * **3D Planet Lighting:** Custom fragment shaders make 2D circles look like 3D spheres with rim lighting.
-    * **Glowing Sun:** Radial gradient shader for the sun's core and corona.
-    * **Trails:** Fading vertex arrays to visualize orbital paths.
-* **Interactive Simulation:**
-    * **Spawn System:** Click to launch planets into stable orbit.
-    * **Destruction Physics:** Planets are pulled into the sun or collide with each other (no bouncing, realistic absorption).
-    * **Cinematic Intro:** Smooth camera zoom-out animation on startup.
-* **Live Dashboard:** Real-time display of physics equations, entity count, and individual planet stats (Mass/Velocity).
+### 🪐 Physics & Simulation
+* **Newtonian Gravity Engine:** Real-time calculation of $F = G \frac{m_1 m_2}{r^2}$ for realistic orbital mechanics.
+* **Automatic Orbit Injection:** New planets automatically calculate the precise tangential velocity required for a stable circular orbit relative to the Sun.
+* **Collision Event System:**
+    * **Sun Destruction:** Planets that hit the Sun are pulled in via a "Black Hole" suction effect.
+    * **Planet Merging:** Planets colliding with each other are destroyed/absorbed rather than bouncing unrealistically.
 
-## 🛠️ Tech Stack & Architecture
+### 🎨 Cinematic Visuals (GLSL Shaders)
+* **Milky Way Background:** A procedurally generated fragment shader creating a dynamic, moving nebula and twinkling starfield.
+* **3D Planet Rendering:** Custom lighting shaders turn 2D circles into 3D-looking spheres with rim lighting and shadows based on the Sun's position.
+* **Glowing Sun:** Radial gradient shader creating a bright core and soft corona.
+* **Orbital Trails:** Fading vertex arrays that track planetary paths, smoothing out movement.
+* **Cinematic Intro:** A smooth, interpolated camera zoom-out animation upon application start.
 
-* **Language:** C++17
-* **Graphics:** SFML 2.6.1
-* **Physics:** Box2D 2.4.1
-* **Build System:** CMake (Fully Automated)
+### 📊 User Interface
+* **Live Dashboard:** Displays entity count, FPS, and the governing physics equations.
+* **Dynamic Labels:** Every planet displays its Mass and Velocity in real-time, floating above the object.
 
-### Architecture (SOLID Principles)
-The codebase is structured to ensure Single Responsibility and Dependency Inversion:
+### 🎵 Audio
+* **Ambient Soundtrack:** Integrated background music support (WAV/OGG).
 
-* **`GameResources`:** Singleton-like resource manager for Shaders and Fonts (Flyweight pattern).
-* **`PhysicsWorld`:** Encapsulates the Box2D world simulation step.
-* **`CelestialBody`:** Abstract base class for all renderable physics objects (Liskov Substitution).
-* **`GravitySystem`:** Pure static class handling Newton's Law of Universal Gravitation ($F = G \frac{m_1 m_2}{r^2}$).
-* **`InputHandler`:** Separates event polling from game logic.
-* **`ContactListener`:** Observer pattern implementation for handling collisions (Planet death/merging).
+---
 
-## 🚀 How to Build
+## 📐 System Design (UML & SOLID)
 
-This project uses a **Self-Healing CMake Script**. It automatically downloads dependencies (if configured) or patches local libraries and copies all necessary DLLs to the build folder.
+The project follows a strict Object-Oriented design adhering to **SOLID principles** (Single Responsibility, Open/Closed, Liskov Substitution, Dependency Inversion).
 
-### Prerequisites
-* **C++ Compiler:** GCC 15+ (MinGW/MSYS2 Recommended) or MSVC.
-* **CMake:** Version 3.16 or higher.
-* **MSYS2 Packages (For Audio support):** `libflac`, `libvorbis`, `libogg`, `libopenal`.
+### Class Diagram
 
-### Build Steps (VS Code)
-1.  Clone the repository:
-    ```bash
-    git clone [https://github.com/YourUsername/Solar-System-Cpp.git](https://github.com/YourUsername/Solar-System-Cpp.git)
-    ```
-2.  Open the folder in **VS Code**.
-3.  Ensure the **CMake Tools** extension is installed.
-4.  Select your Kit (e.g., `GCC 15.2.0 x86_64-w64-mingw32`).
-5.  Press **F7** to Build.
-6.  Press **F5** to Run.
+```mermaid
+classDiagram
+    class Game {
+        -RenderWindow window
+        -View camera
+        +run()
+        -update(dt)
+        -render()
+    }
 
-*Note: The CMake script will automatically find your compiler's runtime DLLs and the SFML/Box2D DLLs and copy them next to the executable.*
+    class CelestialBody {
+        <<Abstract>>
+        #b2Body* body
+        #Shape shape
+        +render(window, shader)
+        +update(dt)
+        +getMass()
+        +getPosition()
+    }
 
-## 🎮 Controls
+    class Sun {
+        -Shader shader
+        +render()
+    }
 
-* **Mouse Left Click:** Spawn a new planet at the cursor location.
-* The planet will automatically calculate the velocity required for a stable circular orbit around the Sun.
+    class Planet {
+        -State state
+        -VertexArray trail
+        -Text label
+        +update(dt)
+        +startDeath()
+    }
 
-## 📂 Project Structure
+    class PhysicsWorld {
+        -b2World world
+        -ContactListener listener
+        +update()
+    }
 
-```text
-src/
-├── Config.hpp           # Physics constants and simulation tuning
-├── Game.cpp             # Main game loop and rendering orchestrator
-├── GravitySystem.hpp    # Newtonian physics logic
-├── CelestialBody.hpp    # Base class for Sun and Planets
-├── Planet.cpp           # Planet logic (Trails, Death animation, UI)
-├── Sun.cpp              # Sun logic (Shader uniforms)
-├── StarBackground.hpp   # Procedural GLSL background generator
-├── GameResources.hpp    # Resource loader (Shaders/Fonts/Textures)
-├── PhysicsWorld.cpp     # Box2D wrapper
-└── ...
+    class GravitySystem {
+        <<Static>>
+        +applyGravity(Sun, Planet)
+        +calculateOrbitVelocity()
+    }
+
+    class GameResources {
+        +Shader sunShader
+        +Shader planetShader
+        +Font font
+        +Music bgMusic
+        +load()
+    }
+
+    class InputHandler {
+        +handleInput()
+    }
+
+    class GuiLayer {
+        +update(count)
+        +render()
+    }
+
+    %% Relationships
+    Game *-- PhysicsWorld
+    Game *-- InputHandler
+    Game *-- GuiLayer
+    Game *-- GameResources
+    Game *-- "1" Sun
+    Game *-- "*" Planet
+
+    CelestialBody <|-- Sun : Inherits
+    CelestialBody <|-- Planet : Inherits
+
+    Game ..> GravitySystem : Uses
+    PhysicsWorld *-- ContactListener : Owns
