@@ -5,7 +5,7 @@ A high-fidelity, physics-based space simulation engine built with **C++17**, **S
 This project simulates Newtonian gravity, orbital mechanics, and celestial collisions using a modular architecture based on **SOLID principles**. It features procedural generation, custom GLSL shaders for 3D volumetric effects, and a self-healing build system.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="Solar System Demo" width="100%">
+  <img src="assets/Demo.gif" alt="Solar System Demo" width="100%">
 </p>
 
 ---
