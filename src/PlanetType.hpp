@@ -43,12 +43,12 @@ struct PlanetData {
                     sf::Color(150, 50, 10)};
             
             case PlanetType::JUPITER:
-                return {"Jupiter", 120.f, 1.33f, 
+                return {"Jupiter", 100.f, 1.33f, 
                     sf::Color(194, 153, 107),   // Tan
                     sf::Color(160, 100, 60)};   // Brown bands
             
             case PlanetType::SATURN:
-                return {"Saturn", 100.f, 0.69f, 
+                return {"Saturn", 80.f, 0.69f, 
                     sf::Color(210, 180, 140),   // Pale gold
                     sf::Color(180, 150, 110)};
             

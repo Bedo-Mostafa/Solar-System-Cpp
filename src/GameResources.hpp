@@ -7,19 +7,6 @@
 #include "PlanetType.hpp"
 #include "PlanetShaders.hpp"
 
-// Sun shader
-const std::string SUN_FRAG_SHADER = R"(
-#version 120
-uniform vec4 u_color;
-void main() {
-    vec2 coord = gl_TexCoord[0].xy * 2.0 - 1.0;
-    float dist = length(coord);
-    float core = smoothstep(0.7, 0.2, dist);
-    float corona = smoothstep(1.0, 0.4, dist) * 0.5;
-    gl_FragColor = mix(u_color, vec4(1.0, 1.0, 0.8, 1.0), core * 0.8) * (core + corona);
-}
-)";
-
 struct GameResources {
     sf::Shader sunShader;
     std::map<PlanetType, sf::Shader> planetShaders;

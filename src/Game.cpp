@@ -51,6 +51,7 @@ void Game::spawnPlanet(sf::Vector2f mousePos) {
     m_currentPlanetType = PlanetData::getNext(m_currentPlanetType);
 }
 
+
 void Game::update(float dt) {
     m_background->update(dt);
 
