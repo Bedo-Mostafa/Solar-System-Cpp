@@ -9,6 +9,7 @@
 #include "Planet.hpp"
 #include "StarBackground.hpp"
 #include "GuiLayer.hpp"
+#include "PlanetType.hpp"
 
 class Game {
 public:
@@ -17,7 +18,6 @@ public:
     void spawnPlanet(sf::Vector2f mousePos);
 
     // Helper to map screen coordinates to world coordinates
-    // (Needed so mouse clicks work correctly while zooming)
     sf::Vector2f getMouseWorldPos(int x, int y) const;
 
 private:
@@ -26,13 +26,16 @@ private:
 
     sf::RenderWindow m_window;
     
-    // --- Camera View ---
+    // Camera View
     sf::View m_gameView; 
     
-    // --- Intro Animation Variables ---
+    // Intro Animation
     float m_introTimer = 0.0f;
     const float INTRO_DURATION = 8.0f; 
     bool m_introFinished = false;
+
+    // Planet cycling
+    PlanetType m_currentPlanetType = PlanetType::MERCURY;
 
     PhysicsWorld m_physics;
     GameResources m_resources;

@@ -1,47 +1,43 @@
 #include "Planet.hpp"
 #include "Config.hpp"
 
-Planet::Planet(b2World &world, sf::Vector2f position, GameResources &resources)
+Planet::Planet(b2World &world, sf::Vector2f position, GameResources &resources, PlanetType type)
     : CelestialBody(nullptr, nullptr),
-      m_shader(resources.planetShader),
+      m_type(type),
+      m_data(PlanetData::getData(type)),
+      m_shader(&resources.planetShaders[type]),
       m_trail(sf::LineStrip)
 {
-    float radius = Utils::randomFloat(15.0f, 35.0f);
-    float density = Utils::randomFloat(0.8f, 2.5f);
-    m_baseColor = sf::Color(
-        (sf::Uint8)Utils::randomFloat(80, 220),
-        (sf::Uint8)Utils::randomFloat(80, 220),
-        (sf::Uint8)Utils::randomFloat(255, 255));
+    m_baseColor = m_data.baseColor;
+    m_secondaryColor = m_data.secondaryColor;
 
-    // Physics
+    // Physics body
     b2BodyDef def;
     def.type = b2_dynamicBody;
     def.position = Utils::toMeters(position);
     def.angularDamping = 0.1f;
     def.allowSleep = false;
-
-    // Store pointer for collision
     def.userData.pointer = reinterpret_cast<uintptr_t>(this);
 
     m_body = world.CreateBody(&def);
 
     b2CircleShape shape;
-    shape.m_radius = radius * METERS_PER_PIXEL;
+    shape.m_radius = m_data.radius * METERS_PER_PIXEL;
     b2FixtureDef fixture;
     fixture.shape = &shape;
-    fixture.density = density;
+    fixture.density = m_data.density;
     fixture.friction = 0.5f;
     fixture.restitution = 0.0f;
     m_body->CreateFixture(&fixture);
 
-    // Visuals
-    auto vShape = std::make_shared<sf::CircleShape>(radius);
-    vShape->setOrigin(radius, radius);
+    // Visual representation
+    auto vShape = std::make_shared<sf::CircleShape>(m_data.radius);
+    vShape->setOrigin(m_data.radius, m_data.radius);
     vShape->setFillColor(sf::Color::White);
     vShape->setTexture(&resources.dummyTexture);
     m_shape = vShape;
 
-    // Info Text Setup
+    // Info text
     m_infoText.setFont(resources.font);
     m_infoText.setCharacterSize(16);
     m_infoText.setFillColor(sf::Color::White);
@@ -69,6 +65,8 @@ bool Planet::isDying() const { return m_state == DYING; }
 
 void Planet::update(float dt)
 {
+    m_animationTime += dt;
+
     if (m_state == DYING)
     {
         m_deathTimer += dt;
@@ -115,18 +113,19 @@ void Planet::update(float dt)
             m_trailPoints.front().position = currentPos;
         }
 
-        // Info Text Logic
+        // Info Text
         b2Vec2 vel = m_body->GetLinearVelocity();
         float speed = vel.Length();
         float mass = m_body->GetMass();
 
         std::stringstream ss;
+        ss << m_data.name << "\n";
         ss << std::fixed << std::setprecision(1);
         ss << "M: " << mass << "\n";
         ss << "V: " << speed;
 
         m_infoText.setString(ss.str());
-        m_infoText.setPosition(currentPos.x - 20.f, currentPos.y - 60.f);
+        m_infoText.setPosition(currentPos.x - 30.f, currentPos.y - m_data.radius - 50.f);
     }
 
     // Rebuild Trail
@@ -146,7 +145,7 @@ void Planet::render(sf::RenderWindow &window, sf::Shader *)
 {
     window.draw(m_trail);
 
-    if (m_body && m_shape)
+    if (m_body && m_shape && m_shader)
     {
         sf::Vector2f sunPos = sf::Vector2f(window.getSize().x / 2.f, window.getSize().y / 2.f);
         sf::Vector2f myPos = Utils::toPixels(m_body->GetPosition());
@@ -156,11 +155,14 @@ void Planet::render(sf::RenderWindow &window, sf::Shader *)
         if (len > 0)
             lightDir /= len;
 
-        m_shader.setUniform("u_baseColor", sf::Glsl::Vec4(m_baseColor));
-        m_shader.setUniform("u_lightDir", lightDir);
-        m_shader.setUniform("u_dissolve", m_dissolveAmount);
+        // Set shader uniforms
+        m_shader->setUniform("u_baseColor", sf::Glsl::Vec4(m_baseColor));
+        m_shader->setUniform("u_secondaryColor", sf::Glsl::Vec4(m_secondaryColor));
+        m_shader->setUniform("u_lightDir", lightDir);
+        m_shader->setUniform("u_dissolve", m_dissolveAmount);
+        m_shader->setUniform("u_time", m_animationTime);
 
-        CelestialBody::render(window, &m_shader);
+        CelestialBody::render(window, m_shader);
     }
 
     if (!isDying() && !isDead())

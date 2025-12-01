@@ -65,6 +65,8 @@ add_executable(solar
     src/Sun.cpp
     src/Planet.cpp
     # Headers (Optional, for IDE visibility)
+    src/PlanetType.hpp
+    src/PlanetShaders.hpp
     src/Game.hpp
     src/PhysicsWorld.hpp
     src/InputHandler.hpp

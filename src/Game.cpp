@@ -4,7 +4,7 @@
 #include <cmath>
 
 Game::Game() 
-    : m_window(sf::VideoMode(1400, 1000), "Polished Solar System", sf::Style::Fullscreen, sf::ContextSettings(0, 0, 8))
+    : m_window(sf::VideoMode(1920, 1080), "Solar System Simulator", sf::Style::Fullscreen, sf::ContextSettings(0, 0, 8))
 {
     m_window.setFramerateLimit(60);
     m_resources.load();
@@ -20,12 +20,8 @@ Game::Game()
     sf::Vector2f center(m_window.getSize().x/2.f, m_window.getSize().y/2.f);
     m_sun = std::make_unique<Sun>(m_physics.getWorld(), center, m_resources);
 
-    // --- Initialize View ---
-    // Start centered on the screen
+    // Initialize View
     m_gameView.setCenter(center);
-    
-    // Start VERY zoomed in (0.1 means 10% of normal size)
-    // Effectively a 10x Zoom on the Sun
     m_gameView.setSize(m_window.getDefaultView().getSize() * 0.1f);
 }
 
@@ -37,37 +33,35 @@ void Game::run() {
     }
 }
 
-// --- Convert Mouse to World Coordinates ---
-// Since the camera zooms, screen pixel (0,0) is not world (0,0) anymore.
 sf::Vector2f Game::getMouseWorldPos(int x, int y) const {
     return m_window.mapPixelToCoords(sf::Vector2i(x, y), m_gameView);
 }
 
 void Game::spawnPlanet(sf::Vector2f mousePos) {
-    auto planet = std::make_unique<Planet>(m_physics.getWorld(), mousePos, m_resources);
+    // Create planet with current type
+    auto planet = std::make_unique<Planet>(m_physics.getWorld(), mousePos, m_resources, m_currentPlanetType);
+    
+    // Calculate orbital velocity
     b2Vec2 v = GravitySystem::calculateOrbitVelocity(m_sun.get(), planet->getPosition());
     planet->getBody()->SetLinearVelocity(v);
+    
     m_planets.push_back(std::move(planet));
+    
+    // Cycle to next planet type
+    m_currentPlanetType = PlanetData::getNext(m_currentPlanetType);
 }
+
 void Game::update(float dt) {
     m_background->update(dt);
 
-    // --- SMOOTH INTRO ANIMATION ---
+    // Smooth intro animation
     if (!m_introFinished) {
         m_introTimer += dt;
         
-        // Calculate progress (0.0 to 1.0)
         float t = std::min(m_introTimer / INTRO_DURATION, 1.0f);
-
-        // --- CHANGED: Use "SmoothStep" interpolation ---
-        // Formula: t * t * (3 - 2 * t)
-        // This starts slow, speeds up in the middle, and slows down at the end.
         float ease = t * t * (3.0f - 2.0f * t);
 
-        // Interpolate Zoom: Start at 0.1 (Close), End at 1.0 (Far)
         float currentZoom = 0.1f + (1.0f - 0.1f) * ease;
-
-        // Apply new size
         sf::Vector2f defaultSize = m_window.getDefaultView().getSize();
         m_gameView.setSize(defaultSize * currentZoom);
 
@@ -94,20 +88,21 @@ void Game::update(float dt) {
     
     m_gui->update(m_planets.size());
 }
+
 void Game::render() {
     m_window.clear(sf::Color::Black);
     
-    // 1. Draw Background (Static - Uses Default View)
+    // Draw Background
     m_window.setView(m_window.getDefaultView());
     m_background->render(m_window);
 
-    // 2. Draw Game Objects (Zooming - Uses Game View)
-    m_window.setView(m_gameView); // <--- Apply the zoom
+    // Draw Game Objects
+    m_window.setView(m_gameView);
     m_sun->render(m_window);
     for (auto& p : m_planets) p->render(m_window);
     
-    // 3. Draw GUI (Static - Uses Default View)
-    m_window.setView(m_window.getDefaultView()); // <--- Reset to Draw UI on top
+    // Draw GUI
+    m_window.setView(m_window.getDefaultView());
     m_gui->render(m_window);
 
     m_window.display();
