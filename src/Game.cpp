@@ -20,7 +20,7 @@ Game::Game()
     sf::Vector2f center(m_window.getSize().x/2.f, m_window.getSize().y/2.f);
     m_sun = std::make_unique<Sun>(m_physics.getWorld(), center, m_resources);
 
-    // --- NEW: Initialize View ---
+    // --- Initialize View ---
     // Start centered on the screen
     m_gameView.setCenter(center);
     
@@ -37,7 +37,7 @@ void Game::run() {
     }
 }
 
-// --- NEW: Convert Mouse to World Coordinates ---
+// --- Convert Mouse to World Coordinates ---
 // Since the camera zooms, screen pixel (0,0) is not world (0,0) anymore.
 sf::Vector2f Game::getMouseWorldPos(int x, int y) const {
     return m_window.mapPixelToCoords(sf::Vector2i(x, y), m_gameView);
@@ -49,56 +49,10 @@ void Game::spawnPlanet(sf::Vector2f mousePos) {
     planet->getBody()->SetLinearVelocity(v);
     m_planets.push_back(std::move(planet));
 }
-
-// void Game::update(float dt) {
-//     m_background->update(dt);
-
-//     // --- NEW: INTRO ANIMATION LOGIC ---
-//     if (!m_introFinished) {
-//         m_introTimer += dt;
-        
-//         // Calculate progress (0.0 to 1.0)
-//         float t = std::min(m_introTimer / INTRO_DURATION, 1.0f);
-
-//         // Ease-Out Cubic Function (Starts fast, slows down at the end)
-//         // Formula: 1 - (1-t)^3
-//         float ease = 1.0f - std::pow(1.0f - t, 3.0f);
-
-//         // Interpolate Zoom: Start at 0.1, End at 1.0
-//         float currentZoom = 0.1f + (1.0f - 0.1f) * ease;
-
-//         // Apply new size
-//         sf::Vector2f defaultSize = m_window.getDefaultView().getSize();
-//         m_gameView.setSize(defaultSize * currentZoom);
-
-//         if (t >= 1.0f) m_introFinished = true;
-//     }
-
-//     // Physics Logic
-//     for (auto& planet : m_planets) {
-//         GravitySystem::applyGravity(m_sun.get(), planet.get());
-//         planet->update(dt);
-//     }
-//     m_physics.update();
-
-//     auto it = std::remove_if(m_planets.begin(), m_planets.end(), [&](const auto& p) {
-//         if (p->isDead()) { 
-//             m_physics.getWorld().DestroyBody(p->getBody()); 
-//             return true; 
-//         }
-//         // No manual distance check needed (handled by ContactListener)
-//         return false;
-//     });
-
-//     if (it != m_planets.end()) m_planets.erase(it, m_planets.end());
-    
-//     m_gui->update(m_planets.size());
-// }
-
 void Game::update(float dt) {
     m_background->update(dt);
 
-    // --- NEW: SMOOTH INTRO ANIMATION ---
+    // --- SMOOTH INTRO ANIMATION ---
     if (!m_introFinished) {
         m_introTimer += dt;
         

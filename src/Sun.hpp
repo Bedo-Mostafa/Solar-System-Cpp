@@ -1,4 +1,3 @@
-// Sun.hpp
 #pragma once
 #include "CelestialBody.hpp"
 #include "GameResources.hpp"

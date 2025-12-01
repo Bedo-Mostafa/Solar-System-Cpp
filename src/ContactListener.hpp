@@ -1,32 +1,3 @@
-// #pragma once
-// #include <box2d/box2d.h>
-// #include "Planet.hpp"
-
-// class ContactListener : public b2ContactListener {
-// public:
-//     void BeginContact(b2Contact* contact) override {
-//         b2Body* bodyA = contact->GetFixtureA()->GetBody();
-//         b2Body* bodyB = contact->GetFixtureB()->GetBody();
-
-//         // 1. Check if BodyA is a Planet
-//         if (bodyA->GetType() == b2_dynamicBody) {
-//             auto planet = reinterpret_cast<Planet*>(bodyA->GetUserData().pointer);
-//             if (planet) planet->startDeath();
-//         }
-
-//         // 2. Check if BodyB is a Planet
-//         if (bodyB->GetType() == b2_dynamicBody) {
-//             auto planet = reinterpret_cast<Planet*>(bodyB->GetUserData().pointer);
-//             if (planet) planet->startDeath();
-//         }
-
-//         // Explanation:
-//         // - If Planet hits Sun (Static), only the Planet dies.
-//         // - If Planet hits Planet (Dynamic vs Dynamic), both die.
-//         // - startDeath() disables collision immediately, so they won't bounce.
-//     }
-// };
-
 #pragma once
 #include <box2d/box2d.h>
 #include "Planet.hpp"

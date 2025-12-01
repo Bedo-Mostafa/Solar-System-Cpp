@@ -1,5 +1,4 @@
 
-// Sun.cpp
 #include "Sun.hpp"
 #include "Config.hpp"
 

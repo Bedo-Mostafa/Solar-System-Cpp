@@ -1,14 +1,11 @@
 #include "Planet.hpp"
 #include "Config.hpp"
 
-// Constructor Implementation
 Planet::Planet(b2World &world, sf::Vector2f position, GameResources &resources)
     : CelestialBody(nullptr, nullptr),
       m_shader(resources.planetShader),
       m_trail(sf::LineStrip)
 {
-    // --- CHANGED: Bigger Planets ---
-    // Old: 6 to 14 -> New: 15 to 35
     float radius = Utils::randomFloat(15.0f, 35.0f);
     float density = Utils::randomFloat(0.8f, 2.5f);
     m_baseColor = sf::Color(
@@ -45,9 +42,8 @@ Planet::Planet(b2World &world, sf::Vector2f position, GameResources &resources)
     m_shape = vShape;
 
     // Info Text Setup
-    // --- CHANGED: Bigger Text ---
     m_infoText.setFont(resources.font);
-    m_infoText.setCharacterSize(16); // Old: 12 -> New: 16
+    m_infoText.setCharacterSize(16);
     m_infoText.setFillColor(sf::Color::White);
     m_infoText.setOutlineColor(sf::Color::Black);
     m_infoText.setOutlineThickness(1.0f);

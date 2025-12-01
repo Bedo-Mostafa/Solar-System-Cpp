@@ -53,8 +53,8 @@ struct GameResources {
     sf::Shader sunShader;
     sf::Shader planetShader;
     sf::Texture dummyTexture;
-    sf::Font font; // <--- NEW: Shared Font
-    sf::Music bgMusic; // <--- NEW: Music Object
+    sf::Font font;
+    sf::Music bgMusic;
     bool loaded = false;
 
     void load() {
@@ -66,20 +66,17 @@ struct GameResources {
         dummyTexture.setSmooth(true);
 
         // Load Shaders
-        // (Assuming you have the code from the previous step here...)
         sunShader.loadFromMemory(SUN_FRAG_SHADER, sf::Shader::Fragment);
         planetShader.loadFromMemory(PLANET_FRAG_SHADER, sf::Shader::Fragment);
         sunShader.setUniform("texture", sf::Shader::CurrentTexture);
         planetShader.setUniform("texture", sf::Shader::CurrentTexture);
 
-        // --- NEW: Load Font from Windows System Folder ---
+        // --- Load Font from Windows System Folder ---
         // This avoids you needing to download a .ttf file manually
         if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf")) {
             std::cerr << "Failed to load Arial font. Make sure it exists in C:/Windows/Fonts/\n";
         }
-        // --- NEW: Load Music ---
-        // Note: SFML supports .ogg, .wav, .flac. 
-        // "music.ogg" must be in the same folder as the .exe or project root
+        // --- Load Music ---
         if (!bgMusic.openFromFile("music.wav")) { 
             // Fallback: Try looking in src folder
             if (!bgMusic.openFromFile("src/music.wav")) {

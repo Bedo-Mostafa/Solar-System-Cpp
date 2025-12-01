@@ -1,4 +1,3 @@
-// InputHandler.hpp
 #pragma once
 #include <SFML/Graphics.hpp>
 class Game;
